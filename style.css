@@ -1,0 +1,57 @@
+.columns-container {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.env-column {
+  flex: 1;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.env-header {
+  margin-top: 0;
+}
+
+.env-address {
+  font-size: 0.9em;
+  margin-bottom: 12px;
+  color: #666;
+}
+
+.program-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+
+.program-title {
+  font-weight: bold;
+}
+
+.program-path {
+  font-size: 0.95em;
+  color: #555;
+}
+
+.program-url {
+  color: #0074d9;
+}
+
+.program-status {
+  font-weight: bold;
+}
+
+.program-status.running {
+  color: green;
+}
+
+.program-status.stopped {
+  color: red;
+}
