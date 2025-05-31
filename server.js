@@ -1,4 +1,4 @@
-import { WebSocketServer } from 'ws';
+import { WebSocketServer } from "ws";
 
 const wss = new WebSocketServer({ port: 8080 });
 
@@ -20,55 +20,44 @@ function generateMessage(id, address) {
     const start_time = new Date().toISOString();
     const end_time = status === "running" ? null : new Date().toISOString();
 
-    return {
-        id,
-        address,
-        payload: {
-            ...programInfo,
-            status,
-            start_time,
-            end_time
-        }
-    };
+    return {id, address, payload: {...programInfo, status, start_time, end_time}};
 }
 
-wss.on('connection', function connection(ws) {
-    let interval = null;
-    let idAddressList = [];
+wss.on("connection", (ws) => {
+  let interval = null;
+  let environments = [];
 
-    ws.once('message', (message) => {
-        try {
-            const data = JSON.parse(message.toString());
-            if (
-                Array.isArray(data) &&
-                data.length > 0 &&
-                data.every(
-                    item =>
-                        typeof item === 'object' &&
-                        item !== null &&
-                        typeof item.id === 'number' &&
-                        typeof item.address === 'string'
-                )
-            ) {
-                idAddressList = data;
-                interval = setInterval(() => {
-                    idAddressList.forEach(({ id, address }) => {
-                        const msg = generateMessage(id, address);
-                        ws.send(JSON.stringify(msg));
-                    });
-                }, 5000);
-                
-            } else {
-                ws.send(JSON.stringify({ error: "Expected array of { id, address } objects" }));
+  ws.on("message", (message) => {
+    if (interval) clearInterval(interval);
+
+    try {
+      const data = JSON.parse(message.toString());
+      if (
+        Array.isArray(data) &&
+        data.every((item) => item.id && item.address)
+      ) {
+        environments = data;
+        interval = setInterval(() => {
+          environments.forEach(({ id, address }) => {
+            try {
+              const msg = generateMessage(id, address);
+              ws.send(JSON.stringify(msg));
+            } catch (e) {
+              ws.send(JSON.stringify({ error: "Failed to generate message" }));
             }
-        } catch (e) {
-            ws.send(JSON.stringify({ error: "Invalid JSON" }));
-        }
-    });
+          });
+        }, 5000);
+      } else {
+        ws.send(JSON.stringify({ error: "Invalid Message Format" }));
+      }
+    } catch (e) {
+      ws.send(JSON.stringify({ error: "Invalid JSON Format" }));
+    }
+  });
 
-    ws.on('close', () => {
-        if (interval) clearInterval(interval);
-    });
+  ws.on("close", () => {
+    if (interval) clearInterval(interval);
+  });
 });
 
-console.log('WebSocket server running on ws://localhost:8080');
+console.log("WebSocket server running on ws://localhost:8080");
