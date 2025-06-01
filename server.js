@@ -45,7 +45,7 @@ wss.on("connection", (ws) => {
             environments = JSON.parse(message.toString());
 
             if (Array.isArray(environments) && environments.every((item) => item.id)) {
-                ws.send(JSON.stringify({ programs }));
+                environments.forEach(({id}) => ws.send(JSON.stringify({ id, payload: programs })));
                 
                 interval = setInterval(() => {
                     environments.forEach(({ id, address }) => {
