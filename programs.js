@@ -1,0 +1,62 @@
+const programs =
+
+[
+  {
+    "program": "Payment Gateway",
+    "url_path": "/payment-gateway",
+    "process_id": "48355",
+    "status": "running",
+    "start_time": "2023-10-01T12:00:00Z",
+    "end_time": null
+  },
+  {
+    "program": "User Management",
+    "url_path": "/user-management",
+    "process_id": "5678",
+    "status": "stopped",
+    "start_time": "2023-10-01T12:00:00Z",
+    "end_time": "2023-10-01T14:00:00Z"
+  },
+  {
+    "program": "Notification Service",
+    "url_path": "/notifications",
+    "process_id": "48357",
+    "status": "running",
+    "start_time": "2023-10-01T12:00:00Z",
+    "end_time": null
+  },
+  {
+    "program": "Monitoring Portal",
+    "url_path": "/dashboard/monitoring-portal",
+    "process_id": "18221",
+    "status": "running",
+    "start_time": "2023-10-01T12:00:00Z",
+    "end_time": null
+  },
+  {
+    "program": "Device Interface",
+    "url_path": "/device-interface",
+    "process_id": "5660",
+    "status": "stopped",
+    "start_time": "2023-10-01T12:00:00Z",
+    "end_time": "2023-10-01T14:00:00Z"
+  },
+  {
+    "program": "Switch",
+    "url_path": "/switch",
+    "process_id": "48360",
+    "status": "running",
+    "start_time": "2023-10-01T12:00:00Z",
+    "end_time": null
+  },
+  {
+    "program": "Reporting Engine",
+    "url_path": "/dashboard/reporting",
+    "process_id": "89004",
+    "status": "running",
+    "start_time": "2023-10-01T12:00:00Z",
+    "end_time": null
+  }
+]
+
+export default programs;

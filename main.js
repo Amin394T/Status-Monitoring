@@ -1,46 +1,123 @@
 import "./style.css";
 
-const res = await fetch("data.json");
-const data = await res.json();
+const root = document.getElementById("root");
 
-const app = document.querySelector("#app");
-app.innerHTML = "";
+let environments = [];
+async function fetchEnvironments() {
+  return fetch("environments.json");
+}
 
-const columnsContainer = document.createElement("div");
-columnsContainer.classList.add("columns-container");
+(async function init() {
 
-data.forEach((env) => {
-  const col = document.createElement("div");
-  col.classList.add("env-column");
+  try {
+    environments = await fetchEnvironments();
+    console.log(environments);
+  } catch (error) {
+    console.error(error);
+    return; // Stop execution if data fetch fails
+  }
 
-  const header = document.createElement("h2");
-  header.textContent = env.environment;
-  header.classList.add("env-header");
-  col.appendChild(header);
+  const ws = new WebSocket("ws://127.0.0.1:8000/ws");
 
-  const addr = document.createElement("div");
-  addr.textContent = env.address;
-  addr.classList.add("env-address");
-  col.appendChild(addr);
+  ws.onopen = function () {
+    ws.send(
+      JSON.stringify({
+        cmd: "CONFIG",
+        supervisors: environments,
+      })
+    );
+    console.log("Sent CONFIG ?", environments);
+  };
 
-  env.programs.forEach((prog) => {
-    const card = document.createElement("div");
-    card.classList.add("program-card");
+  // Environments Columns //
+  environments.forEach((env) => {
+    const envRegion = document.createElement("div");
+    envRegion.className = "envRegion";
+    envRegion.id = `environment-${env.id}`;
 
-    card.innerHTML = `
-        <div class="program-title">${prog.program}</div>
-        <div class="program-path">
-          Path: <a class="program-url" href="${prog.url_path}" target="_blank" rel="noopener">${prog.url_path}</a>
-        </div>
-        <div>PID: ${prog.process_id}</div>
-        <div>Status: <span class="program-status ${prog.status === "running" ? "running" : "stopped"}">${prog.status}</span></div>
-        <div>Start: ${prog.start_time ? prog.start_time : "-"}</div>
-        <div>End: ${prog.end_time ? prog.end_time : "-"}</div>
-      `;
-    col.appendChild(card);
+    const envButton = document.createElement("a");
+    envButton.href = "#";
+    envButton.className = "fa fa-info-circle-o";
+    envRegion.appendChild(envButton);
+
+    const envTitle = document.createElement("h3");
+    envTitle.textContent = env.name;
+    envRegion.appendChild(envTitle);
+
+    const envAddress = document.createElement("h4");
+    envAddress.textContent = env.url;
+    envRegion.appendChild(envAddress);
+
+    root.appendChild(envRegion);
   });
 
-  columnsContainer.appendChild(col);
-});
+  ws.onmessage = (msg) => {
+    const data = JSON.parse(msg.data);
+    const id = data.id;
+    const payload = data.payload;
 
-app.appendChild(columnsContainer);
+    let env = document.querySelector(`#environment-${id}`);
+
+    if (payload.Object.startsWith("/Infs/")) {
+      const code = payload.Object.replace("/Infs/", "");
+
+      const envIndex = environments.findIndex((item) => item.id == id);
+      console.log(envIndex);
+      const intIndex = environments[envIndex].list.findIndex(
+        (item) => item.code == code
+      );
+      intIndex == -1
+        ? environments[envIndex].list.push({ ...payload.Value })
+        : (environments[envIndex].list[intIndex].State = payload.Value);
+
+      if (payload.Event === "List") {
+        card = document.createElement("div");
+        card.className = "interCard";
+        card.id = `interface-${payload.Value.Code}`;
+
+        const status = document.createElement("span");
+        status.innerHTML =
+          payload.Value.State == "runing" ? runningIcon : stoppedIcon;
+        status.className =
+          payload.Value.State == "runing" ? "statusRunning" : "statusStopped";
+        card.appendChild(status);
+
+        const label = document.createElement("h5");
+        label.textContent = `[${payload.Value.Code}] ${payload.Value.Name}`;
+        card.appendChild(label);
+
+        const details = document.createElement("a");
+        details.className = "fa fa-chevron-right";
+        card.appendChild(details);
+        details.addEventListener("click", function () {
+          //const url = `f?p=&APP_ID.:30:&SESSION.::NO::P30_SUPERVISOR_ID,P30_INTERFACE_CODE,P30_INTERFACE_NAME:${id},${payload.Code},${payload.Name}`;
+          apex.server.process(
+            "OPEN_DETAILS",
+            {
+              x01: id,
+              x02: payload.Value.Code,
+              x03: payload.Value.Name,
+              x04: payload.Value.State,
+            },
+            {
+              success: function (script) {
+                // details.href = script;
+                eval(script.slice("javascript:".length));
+              },
+              dataType: "text",
+            }
+          );
+        });
+
+        env.appendChild(card);
+      } else if (payload.Event == "Change" && payload.Prop == "State") {
+        let card = document.querySelector(`#interface-${code}`);
+        const status = card.querySelector("span");
+        status.innerHTML =
+          payload.Value == "runing" ? runningIcon : stoppedIcon;
+        status.className =
+          payload.Value == "runing" ? "statusRunning" : "statusStopped";
+      }
+    }
+  };
+})();

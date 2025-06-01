@@ -1,0 +1,26 @@
+[
+    {
+        "id": 26,
+        "environment": "Development",
+        "address": "http://localhost:3000",
+        "programs": []
+    },
+    {
+        "id": 74,
+        "environment": "Production",
+        "address": "https://prod.example.com",
+        "programs": []
+    },
+    {
+        "id": 45,
+        "environment": "Staging",
+        "address": "https://172.30.20.88:8444",
+        "programs": []
+    },
+    {
+        "id": 90,
+        "environment": "Testing",
+        "address": "http://localhost:8080",
+        "programs": []
+    }
+]
