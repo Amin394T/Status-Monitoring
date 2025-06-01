@@ -46,10 +46,9 @@ ws.onopen = () => {
 // handle incoming messages
 ws.onmessage = (msg) => {
     const data = JSON.parse(msg.data);
+    const env = document.querySelector(`#environment-${data.id}`);
     
     if (Array.isArray(data.payload)) {
-        const env = document.querySelector(`#environment-${data.id}`);
-
         data.payload.forEach((inter) => {
             const card = document.createElement("div");
             card.className = "interCard";
@@ -57,7 +56,7 @@ ws.onmessage = (msg) => {
 
             const status = document.createElement("span");
             status.innerHTML = inter.status == "running" ? 'R' : 'S';
-            status.className = inter.status == "running" ? "statusRunning" : "statusStopped";
+            status.className = "interStatus " + (inter.status == "running" ? "statusRunning" : "statusStopped");
             card.appendChild(status);
 
             const label = document.createElement("span");
@@ -74,32 +73,21 @@ ws.onmessage = (msg) => {
         });
     }
     else {
-
+        let card = env.querySelector(`#interface-${data.payload.process_id}`);
+        const status = card.querySelector(".interStatus");
+        status.innerHTML = data.payload.status == "running" ? 'R' : 'S';
+        status.className = "interStatus " + (data.payload.status == "running" ? "statusRunning" : "statusStopped");
     }
 };
 
-/*
+// const envIndex = environments.findIndex((item) => item.id == id);
+    
+// const interIndex = environments[envIndex].list.findIndex((item) => item.code == code);
+// interIndex == -1
+//     ? environments[envIndex].list.push({ ...payload.Value })
+//     : (environments[envIndex].list[intIndex].State = payload.Value);
+
 // if (payload.Object.startsWith("/Infs/")) {
 //     const code = payload.Object.replace("/Infs/", "");
-
-    const envIndex = environments.findIndex((item) => item.id == id);
-    console.log(envIndex);
-    const interIndex = environments[envIndex].list.findIndex((item) => item.code == code);
-    interIndex == -1
-        ? environments[envIndex].list.push({ ...payload.Value })
-        : (environments[envIndex].list[intIndex].State = payload.Value);
-
-    //if (payload.Event === "List") {
-    
-    
-    } else if (payload.Event == "Change" && payload.Prop == "State") {
-    let card = document.querySelector(`#interface-${code}`);
-    const status = card.querySelector("span");
-    status.innerHTML =
-        payload.Value == "runing" ? runningIcon : stoppedIcon;
-    status.className =
-        payload.Value == "runing" ? "statusRunning" : "statusStopped";
-    }
-}
-});
-*/
+//      if (payload.Event === "List") {
+// } else if (payload.Event == "Change" && payload.Prop == "State") {
