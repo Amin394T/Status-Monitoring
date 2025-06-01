@@ -4,8 +4,37 @@ const root = document.getElementById("root");
 
 let environments = [];
 async function fetchEnvironments() {
-  return fetch("environments.json");
+    const response = await fetch("data.json");
+    const data = await response.json();
+    return data;
 }
+
+environments = await fetchEnvironments();
+console.log(environments);
+environments.forEach((env) => {
+    const envRegion = document.createElement("div");
+    envRegion.className = "envRegion";
+    envRegion.id = `environment-${env.id}`;
+
+    const envButton = document.createElement("a");
+    envButton.href = "#";
+    envButton.className = "fa fa-circle-info";
+    envRegion.appendChild(envButton);
+
+    const envTitle = document.createElement("div");
+    envTitle.className = "title";
+    envTitle.textContent = env.name;
+    envRegion.appendChild(envTitle);
+
+    const envAddress = document.createElement("div");
+    envAddress.textContent = env.address;
+    envAddress.className = "address";
+    envRegion.appendChild(envAddress);
+
+    root.appendChild(envRegion);
+});
+
+/*
 
 (async function init() {
 
@@ -30,26 +59,7 @@ async function fetchEnvironments() {
   };
 
   // Environments Columns //
-  environments.forEach((env) => {
-    const envRegion = document.createElement("div");
-    envRegion.className = "envRegion";
-    envRegion.id = `environment-${env.id}`;
-
-    const envButton = document.createElement("a");
-    envButton.href = "#";
-    envButton.className = "fa fa-info-circle-o";
-    envRegion.appendChild(envButton);
-
-    const envTitle = document.createElement("h3");
-    envTitle.textContent = env.name;
-    envRegion.appendChild(envTitle);
-
-    const envAddress = document.createElement("h4");
-    envAddress.textContent = env.url;
-    envRegion.appendChild(envAddress);
-
-    root.appendChild(envRegion);
-  });
+  
 
   ws.onmessage = (msg) => {
     const data = JSON.parse(msg.data);
@@ -121,3 +131,5 @@ async function fetchEnvironments() {
     }
   };
 })();
+
+*/

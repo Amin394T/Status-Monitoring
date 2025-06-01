@@ -1,57 +1,77 @@
-.columns-container {
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f7f7f7;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
   display: flex;
+  overflow: auto;
   gap: 24px;
-  align-items: flex-start;
+  padding: 32px;
 }
 
-.env-column {
-  flex: 1;
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-}
-
-.env-header {
-  margin-top: 0;
-}
-
-.env-address {
-  font-size: 0.9em;
-  margin-bottom: 12px;
-  color: #666;
-}
-
-.program-card {
+.envRegion {
   background: #fff;
-  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  padding: 24px 20px 18px;
+  width: 260px;
+  transition: box-shadow 0.2s;
+}
+.envRegion:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.13);
+}
+
+.envRegion .title {
+  font-size: 1.25rem;
+  color: #222;
+  font-weight: 600;
+}
+
+.envRegion .address {
+  font-size: 0.9rem;
+  color: #666;
+  word-break: break-all;
+  border-bottom: 1px solid #e1e1e1;
+  margin-top: 5px;
+  padding-bottom: 15px;
+}
+
+.envRegion .fa {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  color: #0078d4;
+  font-size: 1.3rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.envRegion .fa:hover {
+  color: #005fa3;
+}
+
+/* Example for .interCard if you use it later */
+.interCard {
+  background: #f0f4fa;
   border-radius: 6px;
-  padding: 12px;
-  margin-bottom: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  margin: 8px 0;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.program-title {
+/* Status indicator styles */
+
+.statusRunning {
+  color: #27ae60;
   font-weight: bold;
 }
 
-.program-path {
-  font-size: 0.95em;
-  color: #555;
-}
-
-.program-url {
-  color: #0074d9;
-}
-
-.program-status {
+.statusStopped {
+  color: #e74c3c;
   font-weight: bold;
-}
-
-.program-status.running {
-  color: green;
-}
-
-.program-status.stopped {
-  color: red;
 }
