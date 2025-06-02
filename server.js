@@ -1,7 +1,6 @@
 import { WebSocketServer } from "ws";
 
 // Random Program Generator
-
 const programs = [
     { program: "Payment Gateway", url_path: "/payment-gateway", process_id: "1146" },
     { program: "User Service", url_path: "/user-service", process_id: "48356" },
@@ -31,24 +30,23 @@ function generateMessage(id, address) {
 
 
 // WebSocket Server Setup
-
 const wss = new WebSocketServer({ port: 8080 });
 
 wss.on("connection", (ws) => {
     let interval = null;
-    let environments = [];
+    let data = [];
 
     ws.on("message", (message) => {
         if (interval) clearInterval(interval);
 
         try {
-            environments = JSON.parse(message.toString());
+            data = JSON.parse(message.toString());
 
-            if (Array.isArray(environments) && environments.every((item) => item.id)) {
-                environments.forEach(({id}) => ws.send(JSON.stringify({ id, payload: programs })));
+            if (Array.isArray(data) && data.every((item) => item.id)) {
+                data.forEach(({id}) => ws.send(JSON.stringify({ id, payload: programs })));
                 
                 interval = setInterval(() => {
-                    environments.forEach(({ id, address }) => {
+                    data.forEach(({ id, address }) => {
                         try {
                             const msg = generateMessage(id, address);
                             ws.send(JSON.stringify(msg));
@@ -58,6 +56,13 @@ wss.on("connection", (ws) => {
                         }
                     });
                 }, 5000);
+            }
+            else if (data.id && data.process_id && data.status) {
+                const msg = generateMessage(data.id, data.address);
+                msg.payload.process_id = data.process_id;
+                msg.payload.status = data.status;
+                
+                ws.send(JSON.stringify(msg));
             }
             else {
                 ws.send(JSON.stringify({ error: "Invalid Message Format" }));

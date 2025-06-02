@@ -2,7 +2,7 @@ import "./style.css";
 
 const root = document.getElementById("root");
 
-// fetch environments
+// Fetch Environments
 async function fetchEnvironments() {
     const response = await fetch("data.json");
     const data = await response.json();
@@ -10,7 +10,7 @@ async function fetchEnvironments() {
 }
 let environments = await fetchEnvironments();
 
-// render environments
+// Render Environments
 environments.forEach((env) => {
     const envRegion = document.createElement("div");
     envRegion.className = "envRegion";
@@ -35,7 +35,7 @@ environments.forEach((env) => {
 });
 
 
-// initialize websocket connection
+// Initialize Connection
 const ws = new WebSocket("ws://localhost:8080");
 
 ws.onopen = () => {
@@ -43,7 +43,7 @@ ws.onopen = () => {
     ws.send(JSON.stringify(environments));
 };
 
-// handle incoming messages
+// Handle Messages
 ws.onmessage = (msg) => {
     const data = JSON.parse(msg.data);
     const env = document.querySelector(`#environment-${data.id}`);
@@ -79,15 +79,3 @@ ws.onmessage = (msg) => {
         status.className = "interStatus " + (data.payload.status == "running" ? "statusRunning" : "statusStopped");
     }
 };
-
-// const envIndex = environments.findIndex((item) => item.id == id);
-    
-// const interIndex = environments[envIndex].list.findIndex((item) => item.code == code);
-// interIndex == -1
-//     ? environments[envIndex].list.push({ ...payload.Value })
-//     : (environments[envIndex].list[intIndex].State = payload.Value);
-
-// if (payload.Object.startsWith("/Infs/")) {
-//     const code = payload.Object.replace("/Infs/", "");
-//      if (payload.Event === "List") {
-// } else if (payload.Event == "Change" && payload.Prop == "State") {
