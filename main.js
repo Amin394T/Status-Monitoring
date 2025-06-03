@@ -57,6 +57,7 @@ ws.onmessage = (msg) => {
             const status = document.createElement("span");
             status.innerHTML = inter.status == "running" ? 'R' : 'S';
             status.className = "interStatus " + (inter.status == "running" ? "statusRunning" : "statusStopped");
+            status.dataset.status = inter.status;
             card.appendChild(status);
 
             const label = document.createElement("span");
@@ -67,7 +68,7 @@ ws.onmessage = (msg) => {
             const details = document.createElement("a");
             details.className = "fa fa-chevron-right";
             card.appendChild(details);
-            details.addEventListener("click", () => alert(`Details for ${inter.process_id}`));
+            details.addEventListener("click", () => alert(`Program ${inter.process_id} is ${status.dataset.status}`));
 
             env.appendChild(card);
         });
@@ -77,5 +78,6 @@ ws.onmessage = (msg) => {
         const status = card.querySelector(".interStatus");
         status.innerHTML = data.payload.status == "running" ? 'R' : 'S';
         status.className = "interStatus " + (data.payload.status == "running" ? "statusRunning" : "statusStopped");
+        status.dataset.status = data.payload.status;
     }
 };
