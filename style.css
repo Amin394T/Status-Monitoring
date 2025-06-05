@@ -31,7 +31,7 @@ body {
 
 #navigation > .nav-status {
   margin-block: auto;
-  color: #000;
+  color: #b51111;
   font-weight: bold;
   font-size: 14px;
   background-color: #eee;
@@ -69,7 +69,6 @@ body {
 }
 
 .envRegion .fa {
-  position: absolute;
   top: 18px;
   right: 18px;
   color: #0078d4;

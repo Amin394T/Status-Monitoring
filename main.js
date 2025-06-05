@@ -1,6 +1,6 @@
 import "./style.css";
 
-const root = document.getElementById("root");
+const $root = document.getElementById("root");
 const switchURL = "ws://localhost:8080";
 
 // Fetch Environments
@@ -13,26 +13,26 @@ let environments = await fetchEnvironments();
 
 // Render Environments
 environments.forEach((env) => {
-    const envRegion = document.createElement("div");
-    envRegion.className = "envRegion";
-    envRegion.id = `environment-${env.id}`;
+    const $envRegion = document.createElement("div");
+    $envRegion.className = "envRegion";
+    $envRegion.id = `environment-${env.id}`;
 
-    const envButton = document.createElement("a");
-    envButton.href = "#";
-    envButton.className = "fa fa-circle-info";
-    envRegion.appendChild(envButton);
+    const $envButton = document.createElement("a");
+    $envButton.href = "#";
+    $envButton.className = "fa fa-circle-info";
+    $envRegion.appendChild($envButton);
 
-    const envTitle = document.createElement("div");
-    envTitle.className = "title";
-    envTitle.textContent = env.name;
-    envRegion.appendChild(envTitle);
+    const $envTitle = document.createElement("div");
+    $envTitle.className = "title";
+    $envTitle.textContent = env.name;
+    $envRegion.appendChild($envTitle);
 
-    const envAddress = document.createElement("div");
-    envAddress.textContent = env.address;
-    envAddress.className = "address";
-    envRegion.appendChild(envAddress);
+    const $envAddress = document.createElement("div");
+    $envAddress.textContent = env.address;
+    $envAddress.className = "address";
+    $envRegion.appendChild($envAddress);
 
-    root.appendChild(envRegion);
+    $root.appendChild($envRegion);
 });
 
 
@@ -42,13 +42,18 @@ function connectWebSocket() {
     ws = new WebSocket(switchURL);
 
     ws.onopen = () => {
-        console.log("WebSocket connection established");
         ws.send(JSON.stringify(environments));
+        document.querySelector('.nav-status').style.color = "#35b511";
+        console.log("WebSocket connection established");
     };
 
     ws.onclose = () => {
-        console.log("WebSocket connection closed. Retrying...");
+        document.querySelectorAll('.envRegion').forEach($envRegion => {
+            $envRegion.querySelectorAll('.progCard').forEach($card => $card.remove());
+        });
+        document.querySelector('.nav-status').style.color = "#b51111";
         setTimeout(connectWebSocket, 2000);
+        console.log("WebSocket connection closed. Retrying...");
     };
 
     ws.onerror = (err) => {
@@ -58,39 +63,40 @@ function connectWebSocket() {
 
     ws.onmessage = (msg) => {
         const data = JSON.parse(msg.data);
-        const env = document.querySelector(`#environment-${data.id}`);
+        console.log('INCOMING :', data)
+        const $env = document.querySelector(`#environment-${data.id}`);
         
         if (Array.isArray(data.payload)) {
             data.payload.forEach((prog) => {
-                const card = document.createElement("div");
-                card.className = "progCard";
-                card.id = `program-${prog.process_id}`;
+                const $card = document.createElement("div");
+                $card.className = "progCard";
+                $card.id = `program-${prog.process_id}`;
 
-                const status = document.createElement("span");
-                status.innerHTML = prog.status == "running" ? 'R' : 'S';
-                status.className = "progStatus " + (prog.status == "running" ? "statusRunning" : "statusStopped");
-                status.dataset.status = prog.status;
-                card.appendChild(status);
+                const $status = document.createElement("span");
+                $status.innerHTML = prog.status == "running" ? 'R' : 'S';
+                $status.className = "progStatus " + (prog.status == "running" ? "statusRunning" : "statusStopped");
+                $status.dataset.status = prog.status;
+                $card.appendChild($status);
 
-                const label = document.createElement("span");
-                label.className = "progLabel";
-                label.textContent = `[${prog.process_id}] ${prog.program}`;
-                card.appendChild(label);
+                const $label = document.createElement("span");
+                $label.className = "progLabel";
+                $label.textContent = `[${prog.process_id}] ${prog.program}`;
+                $card.appendChild($label);
 
-                const details = document.createElement("a");
-                details.className = "fa fa-chevron-right";
-                card.appendChild(details);
-                details.addEventListener("click", () => alert(`Program ${prog.process_id} is ${status.dataset.status}`));
+                const $details = document.createElement("a");
+                $details.className = "fa fa-chevron-right";
+                $card.appendChild($details);
+                $details.addEventListener("click", () => alert(`Program ${prog.process_id} is ${$status.dataset.status}`));
 
-                env.appendChild(card);
+                $env.appendChild($card);
             });
         }
         else {
-            let card = env.querySelector(`#program-${data.payload.process_id}`);
-            const status = card.querySelector(".progStatus");
-            status.innerHTML = data.payload.status == "running" ? 'R' : 'S';
-            status.className = "progStatus " + (data.payload.status == "running" ? "statusRunning" : "statusStopped");
-            status.dataset.status = data.payload.status;
+            let $card = $env.querySelector(`#program-${data.payload.process_id}`);
+            const $status = $card.querySelector(".progStatus");
+            $status.innerHTML = data.payload.status == "running" ? 'R' : 'S';
+            $status.className = "progStatus " + (data.payload.status == "running" ? "statusRunning" : "statusStopped");
+            $status.dataset.status = data.payload.status;
         }
     };
 }
