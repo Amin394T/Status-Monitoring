@@ -1,6 +1,7 @@
 import "./style.css";
 
 const root = document.getElementById("root");
+const switchURL = "ws://localhost:8080";
 
 // Fetch Environments
 async function fetchEnvironments() {
@@ -38,7 +39,7 @@ environments.forEach((env) => {
 // Initialize Connection with Retry
 let ws;
 function connectWebSocket() {
-    ws = new WebSocket("ws://localhost:8080");
+    ws = new WebSocket(switchURL);
 
     ws.onopen = () => {
         console.log("WebSocket connection established");
@@ -60,35 +61,35 @@ function connectWebSocket() {
         const env = document.querySelector(`#environment-${data.id}`);
         
         if (Array.isArray(data.payload)) {
-            data.payload.forEach((inter) => {
+            data.payload.forEach((prog) => {
                 const card = document.createElement("div");
-                card.className = "interCard";
-                card.id = `interface-${inter.process_id}`;
+                card.className = "progCard";
+                card.id = `program-${prog.process_id}`;
 
                 const status = document.createElement("span");
-                status.innerHTML = inter.status == "running" ? 'R' : 'S';
-                status.className = "interStatus " + (inter.status == "running" ? "statusRunning" : "statusStopped");
-                status.dataset.status = inter.status;
+                status.innerHTML = prog.status == "running" ? 'R' : 'S';
+                status.className = "progStatus " + (prog.status == "running" ? "statusRunning" : "statusStopped");
+                status.dataset.status = prog.status;
                 card.appendChild(status);
 
                 const label = document.createElement("span");
-                label.className = "interLabel";
-                label.textContent = `[${inter.process_id}] ${inter.program}`;
+                label.className = "progLabel";
+                label.textContent = `[${prog.process_id}] ${prog.program}`;
                 card.appendChild(label);
 
                 const details = document.createElement("a");
                 details.className = "fa fa-chevron-right";
                 card.appendChild(details);
-                details.addEventListener("click", () => alert(`Program ${inter.process_id} is ${status.dataset.status}`));
+                details.addEventListener("click", () => alert(`Program ${prog.process_id} is ${status.dataset.status}`));
 
                 env.appendChild(card);
             });
         }
         else {
-            let card = env.querySelector(`#interface-${data.payload.process_id}`);
-            const status = card.querySelector(".interStatus");
+            let card = env.querySelector(`#program-${data.payload.process_id}`);
+            const status = card.querySelector(".progStatus");
             status.innerHTML = data.payload.status == "running" ? 'R' : 'S';
-            status.className = "interStatus " + (data.payload.status == "running" ? "statusRunning" : "statusStopped");
+            status.className = "progStatus " + (data.payload.status == "running" ? "statusRunning" : "statusStopped");
             status.dataset.status = data.payload.status;
         }
     };

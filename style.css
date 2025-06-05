@@ -12,6 +12,37 @@ body {
   padding: 32px;
 }
 
+#navigation {
+  background-color: #555;
+  height: 45px;
+  display: flex;
+  justify-content: space-between;
+  padding-inline: 20px;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+#navigation > .nav-title {
+  margin-block: auto;
+  color: #eee;
+  font-weight: bold;
+  font-style: italic;
+  font-size: 24px;
+}
+
+#navigation > .nav-status {
+  margin-block: auto;
+  color: #000;
+  font-weight: bold;
+  font-size: 14px;
+  background-color: #eee;
+  padding: 6px 10px;
+  border-radius: 8px;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+
+/* ENVIRONMENTS */
+
 .envRegion {
   background: #fff;
   border-radius: 10px;
@@ -20,9 +51,7 @@ body {
   width: 260px;
   transition: box-shadow 0.2s;
 }
-.envRegion:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.13);
-}
+.envRegion:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.13); }
 
 .envRegion .title {
   font-size: 1.25rem;
@@ -49,12 +78,12 @@ body {
   cursor: pointer;
   transition: color 0.2s;
 }
-.envRegion .fa:hover {
-  color: #005fa3;
-}
+.envRegion .fa:hover { color: #005fa3; }
 
-/* Example for .interCard if you use it later */
-.interCard {
+
+/* PROGRAM */
+
+.progCard {
   background: #f0f4fa;
   border-radius: 6px;
   margin: 8px 0;
@@ -63,8 +92,6 @@ body {
   align-items: center;
   gap: 12px;
 }
-
-/* Status indicator styles */
 
 .statusRunning {
   color: #27ae60;
