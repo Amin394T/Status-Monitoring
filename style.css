@@ -40,6 +40,18 @@ body {
   box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
+#navigation .search {
+  margin: auto;
+}
+
+#navigation .search input {
+  width: 150px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
 
 /* ENVIRONMENTS */
 
