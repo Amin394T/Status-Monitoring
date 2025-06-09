@@ -1,6 +1,7 @@
 import WebSocket, { OPEN, Server } from 'ws';
 
 const supervisorConns = {};
+const connectorTasks = {};
 const wss = new Server({ port: 8000, path: '/ws' });
 
 async function connector(id, url) {
@@ -62,8 +63,8 @@ wss.on('connection', (ws) => {
             for (let sup of msg.supervisors) {
                 const conn = supervisorConns[sup.id];
 
-                if (!conn) {
-                    connector(sup.id, sup.url);
+                if (!conn && !connectorTasks[sup.id]) {
+                    connectorTasks[sup.id] = connector(sup.id, sup.url);
                     console.log('CONNECTION = OPENED :', { id: sup.id, url: sup.url });
                 }
                 else {
