@@ -1,13 +1,13 @@
-import WebSocket, { OPEN, Server } from 'ws';
+import WebSocket, { WebSocketServer } from 'ws';
 
 const supervisorConns = {};
 const connectorTasks = {};
-const wss = new Server({ port: 8000, path: '/ws' });
+const wss = new WebSocketServer({ port: 8000, path: '/ws' });
 
 async function connector(id, url) {
     while (true) {
         try {
-            const ws = new WebSocket(url);
+            const ws = new WebSocket(url, { agent: { rejectUnauthorized: false } });
             await new Promise((resolve, reject) => {
                 ws.once('open', resolve);
                 ws.once('error', reject);
@@ -19,7 +19,7 @@ async function connector(id, url) {
 
             ws.on('message', (raw) => {
                 let msg;
-                try { JSON.parse(raw) } catch { return };
+                try { msg = JSON.parse(raw) } catch { return };
                 console.log('INCOMING < SERVER :', msg);
 
                 if (msg.Object == '/Infs' && msg.Event == 'List') {
@@ -30,7 +30,7 @@ async function connector(id, url) {
                 }
                 
                 for (let client of wss.clients) {
-                    if (client.readyState == OPEN) {
+                    if (client.readyState == WebSocket.OPEN) {
                         client.send(JSON.stringify({ id, payload: msg }));
                         console.log('OUTGOING > CLIENT :', { id, payload: msg })
                     }
@@ -56,7 +56,7 @@ async function connector(id, url) {
 wss.on('connection', (ws) => {
     ws.on('message', async (raw) => {
         let msg;
-        try { JSON.parse(raw) } catch { return };
+        try { msg = JSON.parse(raw) } catch { return };
         console.log('INCOMING < CLIENT :', msg);
     
         if (msg.cmd == 'CONFIG') {
