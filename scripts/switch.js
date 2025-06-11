@@ -2,7 +2,7 @@ import WebSocket, { WebSocketServer } from 'ws';
 
 const supervisorConns = {};
 const connectorTasks = {};
-const wss = new WebSocketServer({ port: 8000, path: '/ws' });
+const wss = new WebSocketServer({ port: 8002, path: '/ws' });
 
 async function connector(id, url) {
     while (true) {

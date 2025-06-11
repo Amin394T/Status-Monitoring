@@ -14,6 +14,7 @@ const programs = [
     { program: "Monitoring Portal", url_path: "/dashboard/monitoring-portal", process_id: "18221" },
     { program: "Reporting Engine", url_path: "/dashboard/reporting", process_id: "89004" }
 ];
+const processIDs = programs.map(p => p.process_id);
 
 function getRandomElement(array) {
     return array[Math.floor(Math.random() * array.length)];
@@ -30,23 +31,45 @@ function generateMessage(id, address) {
 
 
 // WebSocket Server Setup
-const wss = new WebSocketServer({ port: 8080 });
+const wss = new WebSocketServer({ port: 8001, path: '/ws' });
 
 wss.on("connection", (ws) => {
     let interval = null;
-    let data = [];
 
-    ws.on("message", (message) => {
+    ws.on("message", (raw) => {
         if (interval) clearInterval(interval);
 
         try {
-            data = JSON.parse(message.toString());
+            const msg = JSON.parse(raw.toString());
+            console.log('INCOMING :', msg)
 
-            if (Array.isArray(data) && data.every((item) => item.id)) {
-                data.forEach(({id}) => ws.send(JSON.stringify({ id, payload: programs })));
+            if(msg.Object == '/Infs') {
+                ws.send(JSON.stringify({ Object: '/Infs', Event: 'List', Value: processIDs }));
+                console.log('OUTGOING :', processIDs);
+            }
+            else if(msg.Object.startsWith('/Infs/')) {
+                const code = msg.Object.split('/').pop();
+                const program = programs.find(p => p.process_id == code);
+                
+                if(msg.Event == 'List') {
+                    if (program) {
+                        ws.send(JSON.stringify({ Object: msg.Object, Event: 'Info', Value: {...program, status: 'running'} }));
+                        console.log('OUTGOING :', program);
+                    }
+                }
+                else if(msg.Event == 'Action') {
+                    if (program) {
+                        ws.send(JSON.stringify({ Object: msg.Object, Event: 'Started', Value: {...program, status: msg.Action == 'Start' ? 'running' : 'stopped'} }));
+                        console.log('OUTGOING :', program);
+                    }
+                }
+            }
+
+            if (Array.isArray(msg) && msg.every((item) => item.id)) {
+                msg.forEach(({id}) => ws.send(JSON.stringify({ id, payload: programs })));
                 
                 interval = setInterval(() => {
-                    data.forEach(({ id, address }) => {
+                    msg.forEach(({ id, address }) => {
                         try {
                             const msg = generateMessage(id, address);
                             ws.send(JSON.stringify(msg));
@@ -57,10 +80,10 @@ wss.on("connection", (ws) => {
                     });
                 }, 5000);
             }
-            else if (data.id && data.process_id && data.status) {
-                const msg = generateMessage(data.id, data.address);
-                msg.payload.process_id = data.process_id;
-                msg.payload.status = data.status;
+            else if (msg.id && msg.process_id && msg.status) {
+                const msg = generateMessage(msg.id, msg.address);
+                msg.payload.process_id = msg.process_id;
+                msg.payload.status = msg.status;
                 
                 ws.send(JSON.stringify(msg));
             }
