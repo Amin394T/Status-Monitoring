@@ -7,7 +7,7 @@ const wss = new WebSocketServer({ port: 8000, path: '/ws' });
 async function connector(id, url) {
     while (true) {
         try {
-            const ws = new WebSocket(url, { agent: { rejectUnauthorized: false } });
+            const ws = new WebSocket(url, { rejectUnauthorized: false });
             await new Promise((resolve, reject) => {
                 ws.once('open', resolve);
                 ws.once('error', reject);
@@ -67,7 +67,7 @@ wss.on('connection', (ws) => {
                     connectorTasks[sup.id] = connector(sup.id, sup.url);
                     console.log('CONNECTION = OPENED :', { id: sup.id, url: sup.url });
                 }
-                else {
+                else if (conn && conn.readyState == WebSocket.OPEN) {
                     conn.send(JSON.stringify({ Object: '/Db', Event: 'Reg' }));
                     conn.send(JSON.stringify({ Object: '/Infs', Event: 'Reg' }));
                     console.log('CONNECTION = EXISTS :', { id: sup.id, url: sup.url });
@@ -76,8 +76,8 @@ wss.on('connection', (ws) => {
         }
         else if (msg.id && msg.payload) {
             const conn = supervisorConns[msg.id];
-            
-            if (conn) {
+
+            if (conn && conn.readyState == WebSocket.OPEN) {
                 conn.send(JSON.stringify(msg.payload));
                 console.log('OUTGOING > SERVER :', msg.payload);
             }
