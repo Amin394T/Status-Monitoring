@@ -16,21 +16,7 @@ const programs = [
 ];
 const processIDs = programs.map(p => p.process_id);
 
-function getRandomElement(array) {
-    return array[Math.floor(Math.random() * array.length)];
-}
-
-function generateMessage(id, address) {
-    const process_id = getRandomElement(programs).process_id;
-    const status = getRandomElement(["running", "stopped"]);
-    const start_time = new Date().toISOString();
-    const end_time = status === "running" ? null : new Date().toISOString();
-
-    return {id, address, payload: {process_id, status, start_time, end_time}};
-}
-
-
-// WebSocket Server Setup
+// WebSocker Server Definition
 const wss = new WebSocketServer({ port: 8001, path: '/ws' });
 
 wss.on("connection", (ws) => {
@@ -40,7 +26,8 @@ wss.on("connection", (ws) => {
         if (interval) clearInterval(interval);
 
         try {
-            const msg = JSON.parse(raw.toString());
+            let msg;
+            try { msg = JSON.parse(raw) } catch { return };
             console.log('INCOMING :', msg)
 
             if(msg.Object == '/Infs') {
@@ -50,49 +37,26 @@ wss.on("connection", (ws) => {
             else if(msg.Object.startsWith('/Infs/')) {
                 const code = msg.Object.split('/').pop();
                 const program = programs.find(p => p.process_id == code);
-                
+                if (!program) return;
+
                 if(msg.Event == 'List') {
-                    if (program) {
-                        ws.send(JSON.stringify({ Object: msg.Object, Event: 'Info', Value: {...program, status: 'running'} }));
-                        console.log('OUTGOING :', program);
-                    }
+                    interval = setInterval(() => {
+                        const status = Math.random() < 0.8 ? 'running' : 'stopped';
+                        ws.send(JSON.stringify({ Object: msg.Object, Event: 'Info', Value: {...program, status} }));
+                    }, 5000);
                 }
                 else if(msg.Event == 'Action') {
-                    if (program) {
-                        ws.send(JSON.stringify({ Object: msg.Object, Event: 'Started', Value: {...program, status: msg.Action == 'Start' ? 'running' : 'stopped'} }));
-                        console.log('OUTGOING :', program);
-                    }
+                    const status = msg.Value == 'Start' ? 'running' : msg.Value == 'Stop' ? 'stopped' : 'unknown';
+                    ws.send(JSON.stringify({ Object: msg.Object, Event: 'Status', Value: {...program, status} }));
                 }
-            }
-
-            if (Array.isArray(msg) && msg.every((item) => item.id)) {
-                msg.forEach(({id}) => ws.send(JSON.stringify({ id, payload: programs })));
-                
-                interval = setInterval(() => {
-                    msg.forEach(({ id, address }) => {
-                        try {
-                            const msg = generateMessage(id, address);
-                            ws.send(JSON.stringify(msg));
-                        }
-                        catch (error) {
-                            ws.send(JSON.stringify({ error: "Failed to generate message : " + error.message }));
-                        }
-                    });
-                }, 5000);
-            }
-            else if (msg.id && msg.process_id && msg.status) {
-                const msg = generateMessage(msg.id, msg.address);
-                msg.payload.process_id = msg.process_id;
-                msg.payload.status = msg.status;
-                
-                ws.send(JSON.stringify(msg));
-            }
-            else {
-                ws.send(JSON.stringify({ error: "Invalid Message Format" }));
+                else {
+                    ws.send(JSON.stringify({ Object: msg.Object, Event: 'Error', Value: 'unknown event' }));
+                }
+                console.log('OUTGOING :', program);
             }
         }
         catch (error) {
-            ws.send(JSON.stringify({ error: "Invalid JSON Format : " + error.message }));
+            console.error('ERROR :', error);
         }
   });
 
@@ -100,5 +64,3 @@ wss.on("connection", (ws) => {
         if (interval) clearInterval(interval);
     });
 });
-
-console.log("WebSocket server running on ws://localhost:8080");

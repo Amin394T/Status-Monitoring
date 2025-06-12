@@ -1,4 +1,4 @@
-import WebSocket, { WebSocketServer } from 'ws';
+import { WebSocket, WebSocketServer } from 'ws';
 
 const supervisorConns = {};
 const connectorTasks = {};
@@ -46,8 +46,9 @@ async function connector(id, url) {
             console.log('CONNECTION = CLOSED :', { id, url });
         }
         catch {
-            await new Promise(() => setTimeout(() => {
+            await new Promise((resolve) => setTimeout(() => {
                 console.log('CONNECTION = RETRY :', { id, url });
+                resolve();
             }, 2000));
         }
     }
