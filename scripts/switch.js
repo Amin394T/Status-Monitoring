@@ -49,7 +49,7 @@ async function connector(id, url) {
             await new Promise((resolve) => setTimeout(() => {
                 console.log('CONNECTION = RETRY :', { id, url });
                 resolve();
-            }, 2000));
+            }, 5000));
         }
     }
 }
@@ -72,6 +72,9 @@ wss.on('connection', (ws) => {
                     conn.send(JSON.stringify({ Object: '/Db', Event: 'Reg' }));
                     conn.send(JSON.stringify({ Object: '/Infs', Event: 'Reg' }));
                     console.log('CONNECTION = EXISTS :', { id: sup.id, url: sup.url });
+                }
+                else {
+                    console.log('CONNECTION = LOADING :', { id: sup.id, url: sup.url });
                 }
             }
         }

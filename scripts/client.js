@@ -39,7 +39,7 @@ environments.forEach((env) => {
 
 // Handle Connection
 let ws;
-const switchURL = "ws://localhost:8080";
+const switchURL = "ws://localhost:8001/ws";
 
 function connectWebSocket() {
     ws = new WebSocket(switchURL);
@@ -54,19 +54,21 @@ function connectWebSocket() {
             $envRegion.querySelectorAll('.progCard').forEach($card => $card.remove());
         });
         document.querySelector('.nav-status').style.color = "#b51111";
-        setTimeout(connectWebSocket, 2000);
+        setTimeout(connectWebSocket, 3000);
     };
 
-    ws.onerror = (err) => { ws.close() };
+    ws.onerror = () => { ws.close() };
 
-    ws.onmessage = (msg) => {
-        const data = JSON.parse(msg.data);
-        console.log('INCOMING :', data)
-        const $env = document.querySelector(`#environment-${data.id}`);
-        
-        // Array received => render programs list
-        if (Array.isArray(data.payload)) {
-            data.payload.forEach((prog) => {
+    ws.onmessage = (raw) => {
+        const msg = JSON.parse(raw.data);
+        console.log('INCOMING :', msg)
+        const $env = document.querySelector(`#environment-${msg.id}`);
+        const code = msg.payload.Object.startsWith("/Infs/") && msg.payload.Object.replace("/Infs/", "");
+        let $inter = $env.querySelector(`#interface-${code}`);
+
+        // List event received => render programs list
+        if (msg.payload.Event == "List" && code && !$inter) {
+            msg.payload.forEach((prog) => {
                 const $card = document.createElement("div");
                 $card.className = "progCard";
                 $card.id = `program-${prog.process_id}`;
@@ -90,13 +92,18 @@ function connectWebSocket() {
                 $env.appendChild($card);
             });
         }
-        // Object received => update existing program
-        else {
-            let $card = $env.querySelector(`#program-${data.payload.process_id}`);
+        // Change event received => update existing program
+        else if (msg.payload.Event == "Change" && msg.payload.Prop == "State") {
+            let $card = $env.querySelector(`#program-${msg.payload.process_id}`);
             const $status = $card.querySelector(".progStatus");
-            $status.innerHTML = data.payload.status == "running" ? 'R' : 'S';
-            $status.className = "progStatus " + (data.payload.status == "running" ? "statusRunning" : "statusStopped");
-            $status.dataset.status = data.payload.status;
+            $status.innerHTML = msg.payload.status == "running" ? 'R' : 'S';
+            $status.className = "progStatus " + (msg.payload.status == "running" ? "statusRunning" : "statusStopped");
+            $status.dataset.status = msg.payload.status;
+        }
+        // Delete event received => remove existing program
+        else if (msg.payload.Event == "Delete") {
+            $inter = $env.querySelector(`#interface-${msg.payload.Prop}`);
+            $inter.remove();
         }
     };
 }
