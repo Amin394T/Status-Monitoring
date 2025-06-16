@@ -13,17 +13,16 @@ async function connector(id, url) {
                 ws.once('error', reject);
             });
             supervisorConns[id] = ws;
-            ws.send(JSON.stringify({ Object: '/Infs', Event: 'Reg' }));
+            ws.send(JSON.stringify({ type: 'list' }));
 
-            ws.on('message', (raw) => {
-                let msg;
-                try { msg = JSON.parse(raw) } catch { return };
+            ws.on('message', (msg) => {
+                try { msg = JSON.parse(msg) } catch { return };
                 console.log('INCOMING < SERVER :', msg);
 
-                if (msg.Object == '/Infs' && msg.Event == 'List') {
-                    for (let code of msg.Value || []) {
-                        ws.send(JSON.stringify({ Object: `/Infs/${code}`, Event: 'Reg' }));
-                        console.log('OUTGOING > SERVER :', { id, code });
+                if (msg.type == 'list') {
+                    for (let id of msg.value || []) {
+                        ws.send(JSON.stringify({ type: 'details', target: id }));
+                        console.log('OUTGOING > SERVER :', { type: 'details', target: id });
                     }
                 }
                 
@@ -67,7 +66,7 @@ wss.on('connection', (ws) => {
                     console.log('CONNECTION = OPENED :', { id: sup.id, url: sup.url });
                 }
                 else if (conn && conn.readyState == WebSocket.OPEN) {
-                    conn.send(JSON.stringify({ Object: '/Infs', Event: 'Reg' }));
+                    conn.send(JSON.stringify({ type: 'list' }));
                     console.log('CONNECTION = EXISTS :', { id: sup.id, url: sup.url });
                 }
                 else {
