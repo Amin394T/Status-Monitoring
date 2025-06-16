@@ -44,6 +44,22 @@ wss.on("connection", (ws) => {
                     object = { ...msg, value: status };
                     break;
 
+                case 'random':
+                    if (interval) {
+                        clearInterval(interval);
+                        console.log({ ...msg, value: 'randomizer stopped' });
+                    }
+                    else {
+                        interval = setInterval(() => {
+                            const status = Math.random() < 0.5 ? 'running' : 'stopped';
+                            const processID = processIDs[Math.floor(Math.random() * processIDs.length)];
+                            ws.send(JSON.stringify({ ...msg, target: processID,  value: status }));
+                            console.log('OUTGOING :', { ...msg, target: processID,  value: status });
+                        }, 3000);
+                        console.log({ ...msg, value: 'randomizer running' });
+                    }
+                    return;
+
                 default:
                     object = { ...msg, value: 'command unknown' };
             }
