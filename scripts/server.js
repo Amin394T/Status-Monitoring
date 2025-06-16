@@ -1,6 +1,5 @@
 import { WebSocketServer } from "ws";
 
-// Random Program Generator
 const programs = [
     { program: "Payment Gateway", url_path: "/payment-gateway", process_id: "1146" },
     { program: "User Service", url_path: "/user-service", process_id: "48356" },
@@ -10,57 +9,57 @@ const programs = [
     { program: "Analytics Engine", url_path: "/analytics-engine", process_id: "48360" },
     { program: "Authentication Service", url_path: "/auth-service", process_id: "48362" },
     { program: "Device Interface", url_path: "/device-interface", process_id: "5660" },
-    { program: "Switch", url_path: "/switch", process_id: "48360" },
+    { program: "Switch Interface", url_path: "/switch-interface", process_id: "77855" },
     { program: "Monitoring Portal", url_path: "/dashboard/monitoring-portal", process_id: "18221" },
     { program: "Reporting Engine", url_path: "/dashboard/reporting", process_id: "89004" }
 ];
-const processIDs = programs.map(p => p.process_id);
+const processIDs = programs.map(prg => prg.process_id);
 
-// WebSocker Server Definition
+
 const wss = new WebSocketServer({ port: 8001, path: '/ws' });
 
 wss.on("connection", (ws) => {
+    console.log("CONNECTION = OPENED");
     let interval = null;
+    let object;
 
-    ws.on("message", (raw) => {
-        if (interval) clearInterval(interval);
-
+    ws.on("message", (msg) => {
         try {
-            let msg;
-            try { msg = JSON.parse(raw) } catch { return };
-            console.log('INCOMING :', msg)
+            msg = JSON.parse(msg);
+            console.log('INCOMING :', msg);
 
-            if(msg.Object == '/Infs') {
-                ws.send(JSON.stringify({ Object: '/Infs', Event: 'List', Value: processIDs }));
-                console.log('OUTGOING :', processIDs);
-            }
-            else if(msg.Object.startsWith('/Infs/')) {
-                const code = msg.Object.split('/').pop();
-                const program = programs.find(p => p.process_id == code);
-                if (!program) return;
+            switch (msg.type) {
+                case 'list':
+                    object = { ...msg, value: processIDs };
+                    break;
 
-                if(msg.Event == 'List') {
-                    interval = setInterval(() => {
-                        const status = Math.random() < 0.8 ? 'running' : 'stopped';
-                        ws.send(JSON.stringify({ Object: msg.Object, Event: 'Info', Value: {...program, status} }));
-                    }, 5000);
-                }
-                else if(msg.Event == 'Action') {
-                    const status = msg.Value == 'Start' ? 'running' : msg.Value == 'Stop' ? 'stopped' : 'unknown';
-                    ws.send(JSON.stringify({ Object: msg.Object, Event: 'Status', Value: {...program, status} }));
-                }
-                else {
-                    ws.send(JSON.stringify({ Object: msg.Object, Event: 'Error', Value: 'unknown event' }));
-                }
-                console.log('OUTGOING :', program);
+                case 'details':
+                    const program = programs.find(prg => prg.process_id == msg.target);
+                    if (msg.target && !program) return;
+                    object = { ...msg, value: program };
+                    break;
+
+                case 'toggle':
+                    const status = msg.value == 'run' ? 'running' : msg.value == 'stop' ? 'stopped' : 'unknown';
+                    object = { ...msg, value: status };
+                    break;
+
+                default:
+                    object = { ...msg, value: 'command unknown' };
             }
+
+            ws.send(JSON.stringify(object));
+            console.log('OUTGOING :', object);
         }
         catch (error) {
-            console.error('ERROR :', error);
+            object = { type: 'error', value: 'syntax error' };
+            ws.send(JSON.stringify(object));
+            console.log('OUTGOING :', object);
         }
-  });
+    });
 
     ws.on("close", () => {
+        console.log("CONNECTION = CLOSED");
         if (interval) clearInterval(interval);
     });
 });

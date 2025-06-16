@@ -13,8 +13,6 @@ async function connector(id, url) {
                 ws.once('error', reject);
             });
             supervisorConns[id] = ws;
-
-            ws.send(JSON.stringify({ Object: '/Db', Event: 'Reg' }));
             ws.send(JSON.stringify({ Object: '/Infs', Event: 'Reg' }));
 
             ws.on('message', (raw) => {
@@ -69,7 +67,6 @@ wss.on('connection', (ws) => {
                     console.log('CONNECTION = OPENED :', { id: sup.id, url: sup.url });
                 }
                 else if (conn && conn.readyState == WebSocket.OPEN) {
-                    conn.send(JSON.stringify({ Object: '/Db', Event: 'Reg' }));
                     conn.send(JSON.stringify({ Object: '/Infs', Event: 'Reg' }));
                     console.log('CONNECTION = EXISTS :', { id: sup.id, url: sup.url });
                 }
