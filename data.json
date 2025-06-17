@@ -2,25 +2,25 @@
     {
         "id": 26,
         "name": "Development",
-        "address": "http://localhost:3000",
+        "address": "ws://localhost:8002/ws",
         "programs": []
     },
     {
         "id": 74,
         "name": "Production",
-        "address": "https://prod.example.com",
+        "address": "ws://localhost:8003/ws",
         "programs": []
     },
     {
         "id": 45,
         "name": "Staging",
-        "address": "https://172.30.20.88:8444",
+        "address": "ws://localhost:8004/ws",
         "programs": []
     },
     {
         "id": 90,
         "name": "Testing",
-        "address": "http://localhost:8080",
+        "address": "ws://localhost:8005/ws",
         "programs": []
     }
 ]

@@ -16,7 +16,7 @@ const programs = [
 const processIDs = programs.map(prg => prg.process_id);
 
 
-const wss = new WebSocketServer({ port: 8001, path: '/ws' });
+const wss = new WebSocketServer({ port: 8002, path: '/ws' });
 
 wss.on("connection", (ws) => {
     console.log("CONNECTION = OPENED");
@@ -53,8 +53,8 @@ wss.on("connection", (ws) => {
                         interval = setInterval(() => {
                             const status = Math.random() < 0.5 ? 'running' : 'stopped';
                             const processID = processIDs[Math.floor(Math.random() * processIDs.length)];
-                            ws.send(JSON.stringify({ ...msg, target: processID,  value: status }));
-                            console.log('OUTGOING :', { ...msg, target: processID,  value: status });
+                            ws.send(JSON.stringify({ type: 'toggle', target: processID,  value: status }));
+                            console.log('OUTGOING :', { type: 'random', target: processID,  value: status });
                         }, 3000);
                         console.log({ ...msg, value: 'randomizer running' });
                     }

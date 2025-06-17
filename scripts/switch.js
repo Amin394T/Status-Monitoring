@@ -2,7 +2,7 @@ import { WebSocket, WebSocketServer } from 'ws';
 
 const supervisorConns = {};
 const connectorTasks = {};
-const wss = new WebSocketServer({ port: 8002, path: '/ws' });
+const wss = new WebSocketServer({ port: 8001, path: '/ws' });
 
 async function connector(id, url) {
     while (true) {
@@ -28,8 +28,8 @@ async function connector(id, url) {
                 
                 for (let client of wss.clients) {
                     if (client.readyState == WebSocket.OPEN) {
-                        client.send(JSON.stringify({ id, payload: msg }));
-                        console.log('OUTGOING > CLIENT :', { id, payload: msg })
+                        client.send(JSON.stringify({ target: id, value: msg }));
+                        console.log('OUTGOING > CLIENT :', { target: id, value: msg })
                     }
                 }
             });
@@ -56,9 +56,9 @@ wss.on('connection', (ws) => {
         let msg;
         try { msg = JSON.parse(raw) } catch { return };
         console.log('INCOMING < CLIENT :', msg);
-    
-        if (msg.cmd == 'CONFIG') {
-            for (let sup of msg.supervisors) {
+
+        if (msg.type == 'config') {
+            for (let sup of msg.value || []) {
                 const conn = supervisorConns[sup.id];
 
                 if (!conn && !connectorTasks[sup.id]) {
@@ -74,12 +74,12 @@ wss.on('connection', (ws) => {
                 }
             }
         }
-        else if (msg.id && msg.payload) {
+        else {
             const conn = supervisorConns[msg.id];
 
             if (conn && conn.readyState == WebSocket.OPEN) {
-                conn.send(JSON.stringify(msg.payload));
-                console.log('OUTGOING > SERVER :', msg.payload);
+                conn.send(JSON.stringify(msg.value));
+                console.log('OUTGOING > SERVER :', msg.value);
             }
             else {
                 console.log('CONNECTION = ERROR :', { id: msg.id, url: 'NOT FOUND' })

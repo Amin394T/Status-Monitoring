@@ -1,7 +1,5 @@
-import "./style.css";
+import "../style.css";
 
-
-// Fetch Environments
 async function fetchEnvironments() {
     const response = await fetch("data.json");
     const data = await response.json();
@@ -10,7 +8,6 @@ async function fetchEnvironments() {
 let environments = await fetchEnvironments();
 
 
-// Render Environments
 const $root = document.getElementById("root");
 
 environments.forEach((env) => {
@@ -37,7 +34,6 @@ environments.forEach((env) => {
 });
 
 
-// Handle Connection
 let ws;
 const switchURL = "ws://localhost:8001/ws";
 
@@ -45,7 +41,7 @@ function connectWebSocket() {
     ws = new WebSocket(switchURL);
 
     ws.onopen = () => {
-        ws.send(JSON.stringify(environments));
+        ws.send(JSON.stringify({ type: 'config', value: environments }));
         document.querySelector('.nav-status').style.color = "#35b511";
     };
 
@@ -59,16 +55,14 @@ function connectWebSocket() {
 
     ws.onerror = () => { ws.close() };
 
-    ws.onmessage = (raw) => {
-        const msg = JSON.parse(raw.data);
+    ws.onmessage = (msg) => {
+        msg = JSON.parse(msg.data);
         console.log('INCOMING :', msg)
-        const $env = document.querySelector(`#environment-${msg.id}`);
-        const code = msg.payload.Object.startsWith("/Infs/") && msg.payload.Object.replace("/Infs/", "");
-        let $inter = $env.querySelector(`#interface-${code}`);
+        const $env = document.querySelector(`#environment-${msg.target}`);
+        let $prog = $env.querySelector(`#program-${msg.value.target}`);
 
-        // List event received => render programs list
-        if (msg.payload.Event == "List" && code && !$inter) {
-            msg.payload.forEach((prog) => {
+        if (msg.value.type == "list" && !$prog) {
+            msg.value.value.forEach((prog) => {
                 const $card = document.createElement("div");
                 $card.className = "progCard";
                 $card.id = `program-${prog.process_id}`;
@@ -92,18 +86,16 @@ function connectWebSocket() {
                 $env.appendChild($card);
             });
         }
-        // Change event received => update existing program
-        else if (msg.payload.Event == "Change" && msg.payload.Prop == "State") {
-            let $card = $env.querySelector(`#program-${msg.payload.process_id}`);
+        else if (msg.value.type == "toggle") {
+            let $card = $env.querySelector(`#program-${msg.value.target}`);
             const $status = $card.querySelector(".progStatus");
-            $status.innerHTML = msg.payload.status == "running" ? 'R' : 'S';
-            $status.className = "progStatus " + (msg.payload.status == "running" ? "statusRunning" : "statusStopped");
-            $status.dataset.status = msg.payload.status;
+            $status.innerHTML = msg.value.value == "running" ? 'R' : 'S';
+            $status.className = "progStatus " + (msg.value.value == "running" ? "statusRunning" : "statusStopped");
+            $status.dataset.status = msg.value.value;
         }
-        // Delete event received => remove existing program
-        else if (msg.payload.Event == "Delete") {
-            $inter = $env.querySelector(`#interface-${msg.payload.Prop}`);
-            $inter.remove();
+        else if (msg.value.type == "delete") {
+            $prog = $env.querySelector(`#program-${msg.value.target}`);
+            $prog.remove();
         }
     };
 }
