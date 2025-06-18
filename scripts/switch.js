@@ -28,8 +28,8 @@ async function connector(id, url) {
                 
                 for (let client of wss.clients) {
                     if (client.readyState == WebSocket.OPEN) {
-                        client.send(JSON.stringify({ target: id, value: msg }));
-                        console.log('OUTGOING > CLIENT :', { target: id, value: msg })
+                        client.send(JSON.stringify({ id, payload: msg }));
+                        console.log('OUTGOING > CLIENT :', { id, payload: msg });
                     }
                 }
             });
@@ -40,11 +40,11 @@ async function connector(id, url) {
             });
             
             delete supervisorConns[id];
-            console.log('CONNECTION = CLOSED :', { id, url });
+            console.log('CONNECTION :', { id, status: 'CLOSED', url });
         }
         catch {
             await new Promise((resolve) => setTimeout(() => {
-                console.log('CONNECTION = RETRY :', { id, url });
+                console.log('CONNECTION :', { id, status: 'RETRY', url });
                 resolve();
             }, 5000));
         }
@@ -58,19 +58,19 @@ wss.on('connection', (ws) => {
         console.log('INCOMING < CLIENT :', msg);
 
         if (msg.type == 'config') {
-            for (let sup of msg.value || []) {
+            for (let sup of msg.payload || []) {
                 const conn = supervisorConns[sup.id];
 
                 if (!conn && !connectorTasks[sup.id]) {
                     connectorTasks[sup.id] = connector(sup.id, sup.url);
-                    console.log('CONNECTION = OPENED :', { id: sup.id, url: sup.url });
+                    console.log('CONNECTION :', { id: sup.id, status: 'OPENED', url: sup.url });
                 }
                 else if (conn && conn.readyState == WebSocket.OPEN) {
                     conn.send(JSON.stringify({ type: 'list' }));
-                    console.log('CONNECTION = EXISTS :', { id: sup.id, url: sup.url });
+                    console.log('CONNECTION :', { id: sup.id, status: 'USED', url: sup.url });
                 }
                 else {
-                    console.log('CONNECTION = LOADING :', { id: sup.id, url: sup.url });
+                    console.log('CONNECTION :', { id: sup.id, status: 'LOADING', url: sup.url });
                 }
             }
         }
@@ -78,12 +78,22 @@ wss.on('connection', (ws) => {
             const conn = supervisorConns[msg.id];
 
             if (conn && conn.readyState == WebSocket.OPEN) {
-                conn.send(JSON.stringify(msg.value));
-                console.log('OUTGOING > SERVER :', msg.value);
+                conn.send(JSON.stringify(msg.payload));
+                console.log('OUTGOING > SERVER :', msg.payload);
             }
             else {
-                console.log('CONNECTION = ERROR :', { id: msg.id, url: 'NOT FOUND' })
+                console.log('CONNECTION :', { id: msg.id, status: 'ERROR', url: 'NOT FOUND' })
             }
         }
     });
 });
+
+// wss.on('close', () => {
+//     for (let id in connectorTasks) {
+//         connectorTasks[id].then(() => delete connectorTasks[id]);
+//     }
+//     for (let id in supervisorConns) {
+//         supervisorConns[id].close();
+//         delete supervisorConns[id];
+//     }
+// });

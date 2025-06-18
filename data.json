@@ -1,26 +1,20 @@
 [
     {
-        "id": 26,
+        "id": 1,
         "name": "Development",
-        "address": "ws://localhost:8002/ws",
+        "url": "ws://localhost:8002/ws",
         "programs": []
     },
     {
-        "id": 74,
+        "id": 2,
         "name": "Production",
-        "address": "ws://localhost:8003/ws",
+        "url": "ws://localhost:8003/ws",
         "programs": []
     },
     {
-        "id": 45,
+        "id": 3,
         "name": "Staging",
-        "address": "ws://localhost:8004/ws",
-        "programs": []
-    },
-    {
-        "id": 90,
-        "name": "Testing",
-        "address": "ws://localhost:8005/ws",
+        "url": "ws://localhost:8004/ws",
         "programs": []
     }
 ]

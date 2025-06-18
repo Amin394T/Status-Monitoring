@@ -26,7 +26,7 @@ environments.forEach((env) => {
     $envRegion.appendChild($envTitle);
 
     const $envAddress = document.createElement("div");
-    $envAddress.textContent = env.address;
+    $envAddress.textContent = env.url;
     $envAddress.className = "address";
     $envRegion.appendChild($envAddress);
 
@@ -41,7 +41,7 @@ function connectWebSocket() {
     ws = new WebSocket(switchURL);
 
     ws.onopen = () => {
-        ws.send(JSON.stringify({ type: 'config', value: environments }));
+        ws.send(JSON.stringify({ type: 'config', payload: environments }));
         document.querySelector('.nav-status').style.color = "#35b511";
     };
 
@@ -58,43 +58,44 @@ function connectWebSocket() {
     ws.onmessage = (msg) => {
         msg = JSON.parse(msg.data);
         console.log('INCOMING :', msg)
-        const $env = document.querySelector(`#environment-${msg.target}`);
-        let $prog = $env.querySelector(`#program-${msg.value.target}`);
+        const $env = document.querySelector(`#environment-${msg.id}`);
+        let $prog = $env.querySelector(`#program-${msg.payload.target}`);
 
-        if (msg.value.type == "list" && !$prog) {
-            msg.value.value.forEach((prog) => {
-                const $card = document.createElement("div");
-                $card.className = "progCard";
-                $card.id = `program-${prog.process_id}`;
+        if (msg.payload.type == "details" && !$prog) {
+            const prog = msg.payload.value;
+        
+            const $card = document.createElement("div");
+            $card.className = "progCard";
+            $card.id = `program-${prog.process_id}`;
 
-                const $status = document.createElement("span");
-                $status.innerHTML = prog.status == "running" ? 'R' : 'S';
-                $status.className = "progStatus " + (prog.status == "running" ? "statusRunning" : "statusStopped");
-                $status.dataset.status = prog.status;
-                $card.appendChild($status);
+            const $status = document.createElement("span");
+            $status.innerHTML = prog.status == "running" ? 'R' : 'S';
+            $status.className = "progStatus " + (prog.status == "running" ? "statusRunning" : "statusStopped");
+            $status.dataset.status = prog.status;
+            $card.appendChild($status);
 
-                const $label = document.createElement("span");
-                $label.className = "progLabel";
-                $label.textContent = `[${prog.process_id}] ${prog.program}`;
-                $card.appendChild($label);
+            const $label = document.createElement("span");
+            $label.className = "progLabel";
+            $label.textContent = `[${prog.process_id}] ${prog.program}`;
+            $card.appendChild($label);
 
-                const $details = document.createElement("a");
-                $details.className = "fa fa-chevron-right";
-                $card.appendChild($details);
-                $details.addEventListener("click", () => alert(`Program ${prog.process_id} is ${$status.dataset.status}`));
+            const $details = document.createElement("a");
+            $details.className = "fa fa-chevron-right";
+            $card.appendChild($details);
+            $details.addEventListener("click", () => alert(`Program ${prog.process_id} is ${$status.dataset.status}`));
 
-                $env.appendChild($card);
-            });
+            $env.appendChild($card);
+            
         }
-        else if (msg.value.type == "toggle") {
-            let $card = $env.querySelector(`#program-${msg.value.target}`);
+        else if (msg.payload.type == "toggle") {
+            let $card = $env.querySelector(`#program-${msg.payload.target}`);
             const $status = $card.querySelector(".progStatus");
-            $status.innerHTML = msg.value.value == "running" ? 'R' : 'S';
-            $status.className = "progStatus " + (msg.value.value == "running" ? "statusRunning" : "statusStopped");
-            $status.dataset.status = msg.value.value;
+            $status.innerHTML = msg.payload.value == "running" ? 'R' : 'S';
+            $status.className = "progStatus " + (msg.payload.value == "running" ? "statusRunning" : "statusStopped");
+            $status.dataset.status = msg.payload.value;
         }
-        else if (msg.value.type == "delete") {
-            $prog = $env.querySelector(`#program-${msg.value.target}`);
+        else if (msg.payload.type == "delete") {
+            $prog = $env.querySelector(`#program-${msg.payload.target}`);
             $prog.remove();
         }
     };
@@ -103,7 +104,7 @@ function connectWebSocket() {
 connectWebSocket();
 
 
-// Search Functionality
+
 const $searchEnv = document.getElementById("search-env");
 const $searchProg = document.getElementById("search-prog");
 
