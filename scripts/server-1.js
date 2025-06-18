@@ -79,3 +79,8 @@ wss.on("connection", (ws) => {
         if (interval) clearInterval(interval);
     });
 });
+
+wss.on("close", () => {
+    ws.send(JSON.stringify({ type: 'delete' }));
+}
+);

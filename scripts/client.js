@@ -95,8 +95,9 @@ function connectWebSocket() {
             $status.dataset.status = msg.payload.value;
         }
         else if (msg.payload.type == "delete") {
-            $prog = $env.querySelector(`#program-${msg.payload.target}`);
-            $prog.remove();
+            $env.querySelectorAll(".progCard").forEach($card => {
+                $card.remove();
+            });
         }
     };
 }

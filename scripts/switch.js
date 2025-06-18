@@ -40,6 +40,11 @@ async function connector(id, url) {
             });
             
             delete supervisorConns[id];
+            for (let client of wss.clients) {
+                if (client.readyState == WebSocket.OPEN) {
+                    client.send(JSON.stringify({ id, payload: { type: 'delete' } }));
+                }
+            }
             console.log('CONNECTION :', { id, status: 'CLOSED', url });
         }
         catch {
