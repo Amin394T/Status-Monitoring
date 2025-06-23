@@ -47,6 +47,7 @@ wss.on("connection", (ws) => {
                 case 'random':
                     if (interval) {
                         clearInterval(interval);
+                        interval = null;
                         console.log({ ...msg, value: 'randomizer stopped' });
                     }
                     else {

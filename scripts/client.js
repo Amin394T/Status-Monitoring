@@ -1,5 +1,8 @@
 import "../style.css";
 
+let ws;
+const switchURL = "ws://localhost:8001/ws";
+
 async function fetchEnvironments() {
     const response = await fetch("data.json");
     const data = await response.json();
@@ -16,7 +19,11 @@ environments.forEach((env) => {
     $envRegion.id = `environment-${env.id}`;
 
     const $envButton = document.createElement("a");
-    $envButton.href = "#";
+    $envButton.onclick = () => {
+        ws.send(JSON.stringify({ id: env.id, payload: { type: 'random' } }));
+        console.log('OUTGOING :', { id: env.id, payload: { type: 'random' } });
+    };
+    $envButton.innerHTML = '+';
     $envButton.className = "fa fa-circle-info";
     $envRegion.appendChild($envButton);
 
@@ -34,8 +41,7 @@ environments.forEach((env) => {
 });
 
 
-let ws;
-const switchURL = "ws://localhost:8001/ws";
+
 
 function connectWebSocket() {
     ws = new WebSocket(switchURL);
