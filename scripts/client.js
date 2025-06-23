@@ -81,6 +81,7 @@ function connectWebSocket() {
 
             const $details = document.createElement("a");
             $details.className = "fa fa-chevron-right";
+            $details.innerHTML = '>';
             $card.appendChild($details);
             $details.addEventListener("click", () => alert(`Program ${prog.process_id} is ${$status.dataset.status}`));
 

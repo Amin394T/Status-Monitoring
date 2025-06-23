@@ -95,21 +95,48 @@ body {
 /* PROGRAM */
 
 .progCard {
-  background: #f0f4fa;
-  border-radius: 6px;
   margin: 8px 0;
-  padding: 10px 14px;
+  padding: 10px 0;
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  transition: transform 0.2s;
+}
+
+.progCard:hover {
+  transform: translateX(3px);
+}
+
+.progCard .fa {
+  cursor: pointer;
+  background: #ececec;
+  padding: 8px 7px 7px 0;
+  border-radius: 0 8px 8px 0;
+  height: 24px;
+  color: #2746ee;
+}
+
+.progStatus {
+  background-color: #d2d2d2;
+  padding: 15px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.progLabel {
+  background: #ececec;
+  padding: 10px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 
 .statusRunning {
   color: #27ae60;
-  font-weight: bold;
-}
+  background-color: #d4f7d4;}
 
 .statusStopped {
   color: #e74c3c;
-  font-weight: bold;
+  background-color: #ffd4d4;
 }
