@@ -89,7 +89,58 @@ function connectWebSocket() {
             $details.className = "fa fa-chevron-right";
             $details.innerHTML = '>';
             $card.appendChild($details);
-            $details.addEventListener("click", () => alert(`Program ${prog.process_id} is ${$status.dataset.status}`));
+
+            // Context menu setup
+            const $menu = document.createElement("div");
+            $menu.className = "context-menu";
+            $menu.style.display = "none";
+            $menu.style.position = "absolute";
+            $menu.style.zIndex = 1000;
+            $menu.innerHTML = `
+                <div class="context-menu-item" data-action="toggle">🔄 Toggle Program</div>
+                <div class="context-menu-item" data-action="download">📥 Download Logs</div>
+                <div class="context-menu-item" data-action="console">🖥️ View Console</div>
+            `;
+            document.body.appendChild($menu);
+
+            $details.addEventListener("click", (e) => {
+                e.stopPropagation();
+                // Close all other context menus before opening this one
+                document.querySelectorAll('.context-menu').forEach(menu => {
+                    menu.style.display = "none";
+                });
+                // Position menu near the button
+                const rect = $details.getBoundingClientRect();
+                $menu.style.left = `${rect.right + window.scrollX}px`;
+                $menu.style.top = `${rect.top + window.scrollY}px`;
+                $menu.style.display = "block";
+
+                // Store program/environment info for actions
+                $menu.dataset.envId = env.id;
+                $menu.dataset.progId = prog.process_id;
+            });
+
+            // Hide menu on click outside
+            document.addEventListener("click", () => {
+                $menu.style.display = "none";
+            });
+
+            // Handle menu actions
+            $menu.addEventListener("click", (e) => {
+                if (!e.target.classList.contains("context-menu-item")) return;
+                const action = e.target.dataset.action;
+                const envId = $menu.dataset.envId;
+                const progId = $menu.dataset.progId;
+
+                if (action === "toggle") {
+                    ws.send(JSON.stringify({ id: envId, payload: { type: "toggle", target: progId } }));
+                } else if (action === "download") {
+                    ws.send(JSON.stringify({ id: envId, payload: { type: "download_logs", target: progId } }));
+                } else if (action === "console") {
+                    ws.send(JSON.stringify({ id: envId, payload: { type: "view_console", target: progId } }));
+                }
+                $menu.style.display = "none";
+            });
 
             $env.appendChild($card);
             
