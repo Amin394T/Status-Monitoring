@@ -120,7 +120,7 @@ function connectWebSocket() {
                 const progId = $menu.dataset.progId;
 
                 if (action === "toggle") {
-                    ws.send(JSON.stringify({ id: envId, payload: { type: "toggle", target: progId } }));
+                    ws.send(JSON.stringify({ id: envId, payload: { type: "toggle", target: progId, value: $status.dataset.status === "running" ? "stop" : "run" } }));
                 } else if (action === "download") {
                     ws.send(JSON.stringify({ id: envId, payload: { type: "download_logs", target: progId } }));
                 } else if (action === "console") {
