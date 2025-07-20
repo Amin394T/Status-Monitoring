@@ -96,7 +96,7 @@ function connectWebSocket() {
                 <div class="context-menu-item" data-action="console"><i class="bi bi-terminal"></i> View Console</div>
                 <div class="context-menu-item" data-action="download"><i class="bi bi-download"></i> Download Logs</div>
             `;
-            document.body.appendChild($menu);
+            $card.appendChild($menu);
 
             $details.addEventListener("click", (e) => {
                 e.stopPropagation();
@@ -104,12 +104,8 @@ function connectWebSocket() {
                     menu.style.display = "none";
                 });
 
-                const rect = $details.getBoundingClientRect();
-                $menu.style.left = `${rect.right + window.scrollX}px`;
-                $menu.style.top = `${rect.top + window.scrollY}px`;
                 $menu.style.display = "block";
-
-                $menu.dataset.envId = env.id;
+                $menu.dataset.envId = msg.id;
                 $menu.dataset.progId = prog.process_id;
             });
 

@@ -105,11 +105,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  transition: transform 0.2s;
-}
-
-.progCard:hover {
-  transform: translateX(3px);
 }
 
 .progCard > .bi {
@@ -159,6 +154,9 @@ body {
   position: absolute;
   z-index: 1000;
   user-select: none;
+  left: 290px;
+  width: 160px;
+  display: none;
 }
 
 .context-menu-item {
@@ -170,7 +168,4 @@ body {
   gap: 8px;
   transition: background 0.15s, color 0.15s;
 }
-
-.context-menu-item:hover {
-  background: #e9e9e9;
-}
+.context-menu-item:hover { background: #e9e9e9; }
