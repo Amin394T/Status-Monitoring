@@ -1,10 +1,10 @@
-import "../css/style.css";
+import "/styles/style.css";
 
 let ws;
 const switchURL = "ws://localhost:8001/ws";
 
 async function fetchEnvironments() {
-    const response = await fetch("data.json");
+    const response = await fetch("/scripts/data.json");
     const data = await response.json();
     return data || [];
 }
