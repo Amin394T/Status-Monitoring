@@ -1,5 +1,4 @@
-import "../style.css";
-import "bootstrap-icons/font/bootstrap-icons.css";
+import "../css/style.css";
 
 let ws;
 const switchURL = "ws://localhost:8001/ws";
@@ -24,7 +23,7 @@ environments.forEach((env) => {
         ws.send(JSON.stringify({ id: env.id, payload: { type: 'random' } }));
         console.log('OUTGOING :', { id: env.id, payload: { type: 'random' } });
     };
-    $envButton.className = "bi bi-gear";
+    $envButton.className = "fa fa-gear";
     $envRegion.appendChild($envButton);
 
     const $envTitle = document.createElement("div");
@@ -75,7 +74,7 @@ function connectWebSocket() {
             $card.id = `program-${prog.process_id}`;
 
             const $status = document.createElement("span");
-            $status.innerHTML = prog.status == "running" ? '<i class="bi bi-check2"></i>' : '<i class="bi bi-x-lg"></i>';
+            $status.innerHTML = prog.status == "running" ? '<i class="fa fa-check"></i>' : '<i class="fa fa-times fa-lg fa-anim-flash"></i>';
             $status.className = "progStatus " + (prog.status == "running" ? "statusRunning" : "statusStopped");
             $status.dataset.status = prog.status;
             $card.appendChild($status);
@@ -86,15 +85,15 @@ function connectWebSocket() {
             $card.appendChild($label);
 
             const $details = document.createElement("a");
-            $details.className = "bi bi-chevron-right";
+            $details.className = "fa fa-chevron-right";
             $card.appendChild($details);
 
             const $menu = document.createElement("div");
             $menu.className = "context-menu";
             $menu.innerHTML = `
-                <div class="context-menu-item" data-action="toggle"><i class="bi bi-toggle2-on"></i> Toggle Program</div>
-                <div class="context-menu-item" data-action="console"><i class="bi bi-terminal"></i> View Console</div>
-                <div class="context-menu-item" data-action="download"><i class="bi bi-download"></i> Download Logs</div>
+                <div class="context-menu-item" data-action="toggle"><i class="fa fa-toggle-on"></i> Toggle Program</div>
+                <div class="context-menu-item" data-action="console"><i class="fa fa-terminal"></i> View Console</div>
+                <div class="context-menu-item" data-action="download"><i class="fa fa-download"></i> Download Logs</div>
             `;
             $card.appendChild($menu);
 
@@ -135,7 +134,7 @@ function connectWebSocket() {
         else if (msg.payload.type == "toggle") {
             let $card = $env.querySelector(`#program-${msg.payload.target}`);
             const $status = $card.querySelector(".progStatus");
-            $status.innerHTML = msg.payload.value == "running" ? '<i class="bi bi-check2"></i>' : '<i class="bi bi-x-lg"></i>';
+            $status.innerHTML = msg.payload.value == "running" ? '<i class="fa fa-check fa-lg"></i>' : '<i class="fa fa-times fa-lg fa-anim-flash"></i>';
             $status.className = "progStatus " + (msg.payload.value == "running" ? "statusRunning" : "statusStopped");
             $status.dataset.status = msg.payload.value;
         }
